@@ -62,3 +62,23 @@ class UserManager:
                 with open(USERS_FILE, 'r') as file:
                     users = json.load(file)
                     return users
+    
+    def add_user(user: dict):
+        """Add new user to file.
+
+        Parameters:
+        ------------------
+
+        user : dict
+            dict containing user's data
+        """
+        users = UserManager.load_users()
+        with open(USERS_FILE, 'w') as file:
+            users.append(user)
+            json.dump(users, file, indent=4)
+
+
+# user1 = {"username": "abcd", "email": "abcd@gmail.com", "role": "user"}
+# user2 = {"username": "efgh", "email": "efgh@gmail.com", "role": "user2"}
+# 
+# UserManager.add_user(user2)
