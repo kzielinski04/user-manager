@@ -40,6 +40,17 @@ class User:
         self.email = email
         self.role = role
 
+    def get_data(self) -> dict:
+        """Get user's data.
+
+        Returns:
+        -------------
+        dict
+            dict containing user's data
+        """
+
+        return {"username": self.username, "email": self.email, "role": self.role }
+
 class UserManager:
     """A class used to manage users.
     
@@ -80,5 +91,4 @@ class UserManager:
 
 # user1 = {"username": "abcd", "email": "abcd@gmail.com", "role": "user"}
 # user2 = {"username": "efgh", "email": "efgh@gmail.com", "role": "user2"}
-# 
-# UserManager.add_user(user2)
+
