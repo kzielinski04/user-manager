@@ -37,3 +37,7 @@ class User:
         self.username = username
         self.email = email
         self.role = role
+
+class UserManager:
+    """A class used to manage users."""
+    pass
