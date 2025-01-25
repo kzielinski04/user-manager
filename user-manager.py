@@ -89,7 +89,27 @@ class UserManager:
     remove_user()
         remove user from file
     
+    display_users()
+        display all users from file
     """
+
+    def validate_email(email: str) -> bool:
+        """Validate user's e-mail address
+
+        Parameters:
+        ------------------
+
+        email : str
+            user's e-mail address
+
+        Returns:
+        -------------
+
+        bool
+            true or false depending on whether the e-mail is valid
+        """
+        pattern = r"^.+@[A-Za-z]+\.[A-Za-z]+$"
+        return True if re.match(pattern, email) else False
 
     def load_users() -> list:
             """Load users from file.
@@ -116,6 +136,9 @@ class UserManager:
         user : dict
             dict containing user's data
         """
+        if not UserManager.validate_email(user["email"]):
+            print("Adres e-mail użytkownika jest nieprawidłowy.")
+            logger.error(f"Nie udało się dodać użytkownika o nazwie \"{user["username"]}\". Adres e-mail jest nieprawidłowy.")
         users = UserManager.load_users()
         with open(USERS_FILE, 'w') as file:
             users.append(user)
@@ -156,20 +179,3 @@ class UserManager:
                 print(f"Nazwa użytkownika: \"{u["username"]}\" \t Adres e-mail: \"{u["email"]}\"\tRola: \"{u["role"]}\"")
                 logger.info(f"Wyświetlono dane użytkownika \"{u["username"]}\".")
             logger.info("Zakończono wyświetlanie danych użytkowników.")
-
-# user1 = User("abcd", "abcd@gmail.com", "role1")
-# UserManager.add_user(user1.get_data())
-# user2 = User("efgh", "efgh@gmail.com", "role2")
-# UserManager.add_user(user2.get_data())
-# user3 = User("1234", "1234@gmail.com", "role3")
-# UserManager.add_user(user3.get_data())
-# user4 = User("xyzv", "xyzv@gmail.com", "role4")
-# UserManager.add_user(user4.get_data())
-# 
-# 
-# 
-# 
-# 
-# UserManager.display_users()
-
-# UserManager.remove_user("1234")
