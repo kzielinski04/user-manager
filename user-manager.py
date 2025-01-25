@@ -20,10 +20,17 @@ class User:
 
     role : str
         role of the user
+
+    Methods:
+    --------------
+
+    get_data()
+        retrieve user's data
     """
     
     def __init__(self, username: str, email: str, role: str):
-        """
+        """Construct all the necessary attributes for the User object. 
+        
         Parameters:
         ------------------
 
@@ -34,14 +41,14 @@ class User:
             email address of the user
 
         role : str
-            role of the user        
+            role of the user
         """
         self.username = username
         self.email = email
         self.role = role
 
     def get_data(self) -> dict:
-        """Get user's data.
+        """Retrieve user's data.
 
         Returns:
         -------------
@@ -56,6 +63,16 @@ class UserManager:
     
     Methods:
     --------------
+
+    load_users()
+        load users from file
+
+    add_user()
+        add new user to file
+
+    remove_user()
+        remove user from file
+    
     """
 
     def load_users() -> list:
@@ -89,20 +106,28 @@ class UserManager:
             json.dump(users, file, indent=4)
 
     def remove_user(username: str):
+        """Remove user from file.
+        
+        Parameters:
+        ------------------
+
+        username : str
+            name of the user
+
+        """
         users = UserManager.load_users()
         updated_users = [u for u in users if u["username"] != username]
         if len(updated_users) != len(users):
             with open(USERS_FILE, 'w') as file:
                 json.dump(updated_users, file)
         else:
-            raise Exception("User not found.")
+            return
 
-
-
-
-# user1 = {"username": "abcd", "email": "abcd@gmail.com", "role": "user"}
-# user2 = {"username": "efgh", "email": "efgh@gmail.com", "role": "user2"}
-
-user = User("abcd", "email", "role")
-user_data = user.get_data
-UserManager.add_user(user_data)
+    def display_users():
+        """Display all the users from file."""
+        users = UserManager.load_users()
+        if not users:
+            print("Nie znaleziono żadnych użytkowników w pliku.")
+        else:
+            for u in users:
+                print(f"Nazwa użytkownika: {u["username"]} \t Adres e-mail: {u["email"]} \t Rola: {u["role"]}")
