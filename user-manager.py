@@ -88,7 +88,21 @@ class UserManager:
             users.append(user)
             json.dump(users, file, indent=4)
 
+    def remove_user(username: str):
+        users = UserManager.load_users()
+        updated_users = [u for u in users if u["username"] != username]
+        if len(updated_users) != len(users):
+            with open(USERS_FILE, 'w') as file:
+                json.dump(updated_users, file)
+        else:
+            raise Exception("User not found.")
+
+
+
 
 # user1 = {"username": "abcd", "email": "abcd@gmail.com", "role": "user"}
 # user2 = {"username": "efgh", "email": "efgh@gmail.com", "role": "user2"}
 
+user = User("abcd", "email", "role")
+user_data = user.get_data
+UserManager.add_user(user_data)
