@@ -144,7 +144,7 @@ class UserManager:
         bool
             true or false depending on whether the e-mail is valid or not
         """
-        pattern = r"^.+@[A-Za-z]+\.[A-Za-z]+$"
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return True if re.match(pattern, email) else False
 
     @staticmethod
