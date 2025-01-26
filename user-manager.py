@@ -97,6 +97,9 @@ class UserManager:
     
     validate_username()
         validate user's name
+
+    validate_role()
+        validate user's role
     """
 
     @staticmethod
@@ -113,14 +116,14 @@ class UserManager:
         -------------
 
         bool
-            true or false depending on whether the e-mail is valid
+            true or false depending on whether the e-mail is valid or not
         """
         pattern = r"^.+@[A-Za-z]+\.[A-Za-z]+$"
         return True if re.match(pattern, email) else False
 
     @staticmethod
     def validate_username(username: str) -> bool:
-        """Validate user's name
+        """Validate user's name.
         
         Parameters:
         ------------------
@@ -132,10 +135,29 @@ class UserManager:
         -------------
 
         bool
-            true or false depending on whether the username is valid
+            true or false depending on whether the username is valid or not
         """
 
-        return True if len(username) > 0 else False
+        return True if len(username.strip()) > 0 else False
+
+    @staticmethod
+    def validate_role(role: str) -> bool:
+        """Validate user's role.
+        
+        Parameters:
+        -------------------
+
+        role : str
+            user's role
+
+        Returns:
+        -------------
+
+        bool
+            true or false depending or whether the role is valid or not
+        """
+
+        return True if len(role.strip()) > 0 else False
 
     @staticmethod
     def load_users() -> list:
@@ -244,12 +266,13 @@ def main():
             case 1:
                 logger.info("Wybrano opcję wyświetlenia danych użytkowników.")
                 UserManager.display_users()
+
             case 2:
                 logger.info("Wybrano opcję dodania nowego użytkownika.")
                 username = input("Podaj nazwę użytkownika: ")
                 logger.debug(f"Wprowadzono nazwę użytkownika \"{username}\".")
                 if not UserManager.validate_username(username):
-                    print("Nazwa użytkownika jest nieprawidłowa. Nazwa użytkownika musi się składać z conajmniej jednego znaku.")
+                    print("Nazwa użytkownika jest nieprawidłowa. Nazwa użytkownika musi się składać z co najmniej jednego znaku.\n")
                     logger.error(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" nie przebiegła pomyślnie.")
                     continue
                 logger.debug(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" przebiegła pomyślnie.")
@@ -262,14 +285,25 @@ def main():
                 logger.debug(f"Walidacja wprowadzonego adresu e-mail \"{email}\" przebiegła pomyślnie.")
                 role = input("Podaj rolę: ")
                 logger.debug(f"Wprowadzono rolę \"{role}\".")
+                if not UserManager.validate_role(role):
+                    print("Nazwa roli użytkownika jest nieprawidłowa. Nazwa musi składać się conajmniej z jednego znaku.\n")
+                    logger.error("Walidacja wprowadzonej roli \"{role}\" nie przebiegła pomyślnie.")
+                    continue
+                logger.debug("Walidacja wprowadzonej roli \"{role}\" przebiegła pomyślnie.")
                 user = User(username, email, role)
                 logger.info(f"Utworzono obiekt klasy User z danymi: username: \"{username}\"; email: \"{email}\"; role: \"{role}\".")
                 UserManager.add_user(user.get_data())
+
             case 3:
                 logger.info("Wybrano opcję usunięcia użytkownika.")
                 username = input("Podaj nazwę użytkownika do usunięcia: ")
                 logger.info(f"Wprowadzono nazwę użytkownika do usunięcia: \"{username}\"")
+                if not UserManager.validate_username(username):
+                    print("Nazwa użytkownika jest nieprawidłowa. Nazwa użytkownika musi się składać z conajmniej jednego znaku.\n")
+                    logger.error(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" nie przebiegła pomyślnie.")
+                    continue
                 UserManager.remove_user(username)
+
             case 4:
                 logger.info("Zakończono działanie programu.")
                 break
