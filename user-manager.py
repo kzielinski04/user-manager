@@ -69,7 +69,7 @@ class User:
         Returns:
         -------------
         dict
-            dict containing user's data
+            dictionary containing user's data
         """
 
         return {"username": self.username, "email": self.email, "role": self.role }
@@ -100,7 +100,33 @@ class UserManager:
 
     validate_role()
         validate user's role
-    """
+   
+    check_user()
+        check if user already exists in file
+     """
+
+    @staticmethod
+    def check_user(username: str) -> bool:
+        """"Check if user already exists in file.
+
+        Parameters:
+        -------------------
+
+        username : str
+            name of the user
+
+        Returns:
+        -------------
+
+        bool
+            true or false depending or whether user already exists in file or not 
+        """
+        try:
+            users = UserManager.load_users()
+            usernames = {user["username"] for user in users}
+            return True if username in usernames else False
+        except Exception:
+            raise Exception
 
     @staticmethod
     def validate_email(email: str) -> bool:
@@ -194,7 +220,9 @@ class UserManager:
         except Exception:
             print("Wystąpił błąd. Plik z użytkownikami jest uszkodzony.\n")
             logger.error("Plik z użytkownikami jest uszkodzony.")
+            logger.error("Nie udało się dodać użytkownika.")
             return
+        
         with open(USERS_FILE, 'w') as file:
             users.append(user)
             json.dump(users, file, indent=4)
@@ -217,8 +245,10 @@ class UserManager:
         except Exception:
             print("Wystąpił błąd. Plik z użytkownikami jest uszkodzony.\n")
             logger.error("Plik z użytkownikami jest uszkodzony.")
+            logger.error("Nie udało się usunąć użytkownika.")
             return
         updated_users = [u for u in users if u["username"] != username]
+        
         if len(updated_users) != len(users):
             with open(USERS_FILE, 'w') as file:
                 json.dump(updated_users, file, indent=4)
@@ -237,7 +267,9 @@ class UserManager:
         except Exception:
             print("Wystąpił błąd. Plik z użytkownikami jest uszkodzony.\n")
             logger.error("Plik z użytkownikami jest uszkodzony.")
+            logger.error("Nie udało się wyświetlić danych użytkowników.")
             return
+        
         if not users:
             print("Nie znaleziono żadnych użytkowników w pliku.\n")
             logger.error("Nie udało się wyświetlić użytkowników. Nie znaleziono żadnych użytkowników w pliku.")
@@ -256,55 +288,92 @@ def main():
         print("1 - Wyświetl użytkowników\n2 - Dodaj użytkownika\n3 - Usuń użytkownika\n4 - Wyjdź\n")
         try:
             choice = int(input("Wybierz opcję: "))
+        
+        # Validate choice
         except ValueError:
             print("Nieprawidłowy wybór.\n")
+            logger.error(f"Wprowadzony wybór \"{choice}\"jest nieprawidłowy. Wprowadzono znak, który nie jest liczbą całkowitą.")
             continue
         if int(choice) not in {1, 2, 3, 4}:
             print("Nieprawidłowy wybór.\n")
+            logger.error(f"Wprowadzony wybór \"{choice}\" jest nieprawidłowy. Wybrano liczbę całkowitą spoza zakresu (1-4).")
             continue
+
         match choice:
             case 1:
                 logger.info("Wybrano opcję wyświetlenia danych użytkowników.")
                 UserManager.display_users()
 
+            # Add user
             case 2:
                 logger.info("Wybrano opcję dodania nowego użytkownika.")
-                username = input("Podaj nazwę użytkownika: ")
-                logger.debug(f"Wprowadzono nazwę użytkownika \"{username}\".")
-                if not UserManager.validate_username(username):
-                    print("Nazwa użytkownika jest nieprawidłowa. Nazwa użytkownika musi się składać z co najmniej jednego znaku.\n")
-                    logger.error(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" nie przebiegła pomyślnie.")
-                    continue
-                logger.debug(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" przebiegła pomyślnie.")
-                email = input("Podaj adres e-mail: ")
-                logger.debug(f"Wprowadzono adres e-mail \"{email}\".")
-                if not UserManager.validate_email(email):
-                    print("Adres e-mail użytkownika jest nieprawidłowy.\n")
-                    logger.error(f"Walidacja wprowadzonego adresu e-mail \"{email}\" nie przebiegła pomyślnie.")
-                    continue
-                logger.debug(f"Walidacja wprowadzonego adresu e-mail \"{email}\" przebiegła pomyślnie.")
-                role = input("Podaj rolę: ")
-                logger.debug(f"Wprowadzono rolę \"{role}\".")
-                if not UserManager.validate_role(role):
-                    print("Nazwa roli użytkownika jest nieprawidłowa. Nazwa musi składać się conajmniej z jednego znaku.\n")
-                    logger.error("Walidacja wprowadzonej roli \"{role}\" nie przebiegła pomyślnie.")
-                    continue
-                logger.debug("Walidacja wprowadzonej roli \"{role}\" przebiegła pomyślnie.")
-                user = User(username, email, role)
-                logger.info(f"Utworzono obiekt klasy User z danymi: username: \"{username}\"; email: \"{email}\"; role: \"{role}\".")
-                UserManager.add_user(user.get_data())
+                try:
+                    username = input("Podaj nazwę użytkownika: ")
+                    logger.debug(f"Wprowadzono nazwę użytkownika: \"{username}\".")
 
+                    # Validate username
+                    if not UserManager.validate_username(username):
+                        print("Nazwa użytkownika jest nieprawidłowa. Nazwa użytkownika musi się składać z co najmniej jednego znaku.\n")
+                        logger.error(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" nie przebiegła pomyślnie.")
+                        logger.error(f"Nie udało się dodać użytkownika.")
+                        continue
+                    logger.debug(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" przebiegła pomyślnie.")
+
+                    # Check if user already exists in file
+                    if UserManager.check_user(username):
+                        print(f"Nie udało się dodać użytkownika. Użytkownik o nazwie \"{username}\"  już istnieje w pliku.\n")
+                        logger.error(f"Nie udało się dodać użytkownika. Użytkownik o nazwie \"{username}\" już istnieje w pliku.")
+                        continue
+
+                    email = input("Podaj adres e-mail: ")
+                    logger.debug(f"Wprowadzono adres e-mail użytkownika: \"{email}\".")
+                    
+                    # Validate e-mail address
+                    if not UserManager.validate_email(email):
+                        print("Wprowadzony adres e-mail jest nieprawidłowy.\n")
+                        logger.error(f"Walidacja wprowadzonego adresu e-mail \"{email}\" nie przebiegła pomyślnie.")
+                        logger.error(f"Nie udało się dodać użytkownika o nazwie \"{username}\".")
+                        continue
+                    logger.debug(f"Walidacja wprowadzonego adresu e-mail \"{email}\" przebiegła pomyślnie.")
+                    
+                    role = input("Podaj rolę: ")
+                    logger.debug(f"Wprowadzono rolę użytkownika: \"{role}\".")
+
+                    # Validate role
+                    if not UserManager.validate_role(role):
+                        print("Nazwa roli użytkownika jest nieprawidłowa. Nazwa musi składać się conajmniej z jednego znaku.\n")
+                        logger.error(f"Walidacja wprowadzonej roli \"{role}\" nie przebiegła pomyślnie.")
+                        logger.error(f"Nie udało się dodać użytkownika o nazwie: \"{username}\".")
+                        continue
+                    logger.debug(f"Walidacja wprowadzonej roli \"{role}\" przebiegła pomyślnie.")
+                    
+                    # Create User object
+                    user = User(username, email, role)
+                    logger.info(f"Utworzono obiekt klasy User z danymi: username: \"{username}\"; email: \"{email}\"; role: \"{role}\".")
+                    UserManager.add_user(user.get_data())
+                except Exception:
+                    print("Nie udało się dodać użytkownika. Plik z użytkownikami jest uszkodzony.\n")
+                    logger.error(f"Nie udało się dodać użytkownika o nazwie \"{username}\". Plik z użytkownikami jest uszkodzony.")
+                    continue
+            
+            # Remove user
             case 3:
                 logger.info("Wybrano opcję usunięcia użytkownika.")
                 username = input("Podaj nazwę użytkownika do usunięcia: ")
                 logger.info(f"Wprowadzono nazwę użytkownika do usunięcia: \"{username}\"")
+
+                # Validate username
                 if not UserManager.validate_username(username):
                     print("Nazwa użytkownika jest nieprawidłowa. Nazwa użytkownika musi się składać z conajmniej jednego znaku.\n")
-                    logger.error(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" nie przebiegła pomyślnie.")
+                    logger.error(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" nie przebiegła pomyślnie. Nazwa użytkownika nie składa się z co najmniej jednego znaku.")
+                    logger.error(f"Nie udało się usunąć użytkownika o nazwie \"{username}\".")
                     continue
+                logger.debug(f"Walidacja wprowadzonej nazwy użytkownika \"{username}\" przebiegła pomyślnie.")
                 UserManager.remove_user(username)
 
+            # Exit program
             case 4:
+                logger.info("Wybrano opcję wyjścia z programu.")
                 logger.info("Zakończono działanie programu.")
                 break
 
